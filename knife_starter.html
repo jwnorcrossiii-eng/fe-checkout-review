@@ -1,0 +1,38 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Knife Starter ($20): live vs test</title>
+<style>
+body{margin:0;font:14px -apple-system,system-ui,sans-serif;background:#d9dade;color:#111}
+header{position:sticky;top:0;z-index:9;background:#111;color:#fff;padding:8px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+header a{color:#f39a86} .pg{color:#ddd;text-decoration:none;padding:4px 8px;border-radius:5px;border:1px solid #444} .pg.cur{background:#fff;color:#111}
+button{font:inherit;padding:6px 12px;border-radius:6px;border:0;cursor:pointer;background:#ddd} button.on{background:#e8513a;color:#fff}
+.row{display:flex;gap:40px;justify-content:center;padding:16px} .dev h2{text-align:center;font-size:15px;margin:0 0 8px}
+.frame{position:relative;background:#111;border-radius:44px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.screen{position:relative;width:390px;height:844px;overflow-y:auto;overflow-x:hidden;border-radius:30px;background:#fff;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none} .screen img{display:block;width:390px}
+.lap .frame{border-radius:14px;padding:12px 12px 22px} .lap .screen{border-radius:4px;width:var(--w);height:calc(var(--w)*0.625);scrollbar-width:auto} .lap .screen img{width:var(--w)}
+.bar{position:sticky;bottom:0;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#111;color:#fff;font:600 16px system-ui;box-shadow:0 -2px 10px rgba(0,0,0,.3)}
+.bar span.o{color:#e8513a} .bar a{background:#e8513a;color:#fff;padding:11px 16px;border-radius:7px;font-weight:700;text-decoration:none}
+.note{font-size:12px;color:#bbb} #ctl{display:flex;gap:8px;align-items:center}
+</style></head><body>
+<header><a class="pg" href="index.html">&larr; Overview</a> <a class="pg cur" href="knife_starter.html">Knife Starter $20</a> <a class="pg" href="kungfu_starter.html">Kung Fu Starter $20</a> <a class="pg" href="complete_knife.html">Complete Knife $180</a><span style="flex:1"></span><button id="bph" class="on" onclick="mode('ph')">Phone</button><button id="bdt" onclick="mode('dt')">Laptop</button><span id="ctl"></span>
+</header>
+<div class="row" id="row"></div>
+<script>
+const M={"dt_live": {"chk": 2777, "h": 6054}, "dt_test": {"chk": 2463, "h": 5740}, "ph_live": {"chk": 2226, "h": 8233}, "ph_test": {"chk": 2422, "h": 8429}}, BAR=["", ""]; let cur='ph', side='test';
+function phone(s){const bar=(s=='test'&&BAR[0])?`<div class="bar" id="bar"><div>${BAR[0]}</div><a href="#">${BAR[1]}</a></div>`:'';
+ return `<div class="dev"><h2>${s=='live'?'CURRENT PAGE':'NEW LAYOUT'}</h2><div class="frame"><div class="screen" id="s_${s}"><img src="knife_starter/ph_${s}.jpg">${bar}</div></div></div>`}
+function mode(m){cur=m; bph.className=m=='ph'?'on':''; bdt.className=m=='dt'?'on':'';
+ if(m=='ph'&&innerWidth<860){ctl.innerHTML='<button id="pl" onclick="one(\'live\')">Current</button><button id="pt" class="on" onclick="one(\'test\')">New</button>'; one(side); return}
+ if(m=='ph'){ctl.innerHTML='<label class="note"><input type="checkbox" id="sync" checked> scroll both together</label>';
+  row.innerHTML=phone('live')+phone('test'); const k=Math.min(1,(innerHeight-100)/880); document.querySelectorAll('.frame').forEach(f=>f.style.zoom=k);
+  const a=s_live,b=s_test; let lock=false; const sc=(x,y)=>()=>{ if(sync.checked&&!lock){lock=true;y.scrollTop=x.scrollTop/(x.scrollHeight-x.clientHeight)*(y.scrollHeight-y.clientHeight);requestAnimationFrame(()=>lock=false)} upd()};
+  a.onscroll=sc(a,b); b.onscroll=sc(b,a);
+  function upd(){const br=document.getElementById('bar'); if(!br) return; br.style.display=(b.scrollTop+844*0.9>M.ph_test.chk)?'none':'flex'}
+  const ba=document.querySelector('#bar a'); if(ba) ba.onclick=e=>{e.preventDefault(); b.scrollTop=M.ph_test.chk}; upd(); return}
+ ctl.innerHTML='<button id="bl" onclick="flip(\'live\')">Current page</button><button id="bt" onclick="flip(\'test\')">New layout</button><span class="note">Flip keeps your place. Shown at true 1440x900 laptop proportions.</span>';
+ const w=Math.min(1440,innerWidth-80, (innerHeight-110)/0.625); document.documentElement.style.setProperty('--w',w+'px');
+ row.innerHTML=`<div class="dev lap"><div class="frame"><div class="screen" id="lap"><img id="limg" src="knife_starter/dt_${side}.jpg"></div></div></div>`; flip(side)}
+function one(s){side=s; row.innerHTML=phone(s); const k=Math.min(1,(innerWidth-40)/420,(innerHeight-110)/880); document.querySelectorAll('.frame').forEach(f=>f.style.zoom=k); pl.className=s=='live'?'on':''; pt.className=s=='test'?'on':''; const sc=document.getElementById('s_'+s); const br=document.getElementById('bar'); if(br){const u=()=>{br.style.display=(sc.scrollTop+844*0.9>M.ph_test.chk)?'none':'flex'}; sc.onscroll=u; u(); br.querySelector('a').onclick=e=>{e.preventDefault(); sc.scrollTop=M.ph_test.chk}}}
+function flip(s){const sc=document.getElementById('lap'); const f=sc.scrollHeight>sc.clientHeight? sc.scrollTop/(sc.scrollHeight-sc.clientHeight):0; side=s;
+ limg.onload=()=>{sc.scrollTop=f*(sc.scrollHeight-sc.clientHeight)}; limg.src='knife_starter/dt_'+s+'.jpg'; bl.className=s=='live'?'on':''; bt.className=s=='test'?'on':''}
+mode('ph'); addEventListener('resize',()=>mode(cur));
+</script></body></html>
